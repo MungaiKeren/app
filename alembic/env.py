@@ -1,18 +1,30 @@
 from logging.config import fileConfig
-
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
-
 from alembic import context
-
-# Import your models and Base
 from database import Base
+from dotenv import load_dotenv
+import os
+
+# Load environment variables
+load_dotenv()
+
+# Import all models here
 from user import User
-from post import Post
+from models.recipe import Recipe
+from models.ingredient import Ingredient
+from models.recipe_ingredient import RecipeIngredient
+from models.instruction import Instruction
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
+
+# Override sqlalchemy.url with environment variables
+config.set_main_option(
+    "sqlalchemy.url",
+    f"postgresql://{os.getenv('DB_USERNAME')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}/{os.getenv('DB_NAME')}"
+)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
