@@ -1,23 +1,28 @@
 from fastapi import FastAPI
-from post import Post
 from database import engine
 from router import posts, users, auth
+from models.recipe import Recipe
+from models.ingredient import Ingredient
+from models.recipe_ingredient import RecipeIngredient
+from models.instruction import Instruction
 from user import User
 
 app = FastAPI()
 
-Post.metadata.create_all(bind=engine)
+# Create all tables
 User.metadata.create_all(bind=engine)
+Recipe.metadata.create_all(bind=engine)
+Ingredient.metadata.create_all(bind=engine)
+RecipeIngredient.metadata.create_all(bind=engine)
+Instruction.metadata.create_all(bind=engine)
 
 app.include_router(posts.router)
 app.include_router(users.router)
 app.include_router(auth.router)
 
-
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
-
+    return {"message": "Welcome to Recipe API"}
 
 @app.get("/hello/{name}")
 async def say_hello(name: str):
