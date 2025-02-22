@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from database import engine
 from router import posts, users, auth, recipes, ingredients, favorites
 from models import User, Recipe, Ingredient, RecipeIngredient, Instruction
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
@@ -17,6 +18,14 @@ app.include_router(auth.router)
 app.include_router(recipes.router)
 app.include_router(ingredients.router)
 app.include_router(favorites.router)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # React default port
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 async def root():
