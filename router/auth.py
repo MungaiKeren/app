@@ -26,7 +26,10 @@ def login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session =
             detail="Invalid Credentials"
         )
     
-    # Create access token
-    access_token = create_access_token(data={"sub": user.email})
+    # Create access token with both email and name
+    access_token = create_access_token(data={
+        "sub": user.email,
+        "name": user.name  # Add the user's name to the token
+    })
     
     return {"access_token": access_token, "token_type": "bearer"} 
