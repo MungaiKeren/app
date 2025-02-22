@@ -13,19 +13,20 @@ Ingredient.metadata.create_all(bind=engine)
 RecipeIngredient.metadata.create_all(bind=engine)
 Instruction.metadata.create_all(bind=engine)
 
-app.include_router(users.router)
-app.include_router(auth.router)
-app.include_router(recipes.router)
-app.include_router(ingredients.router)
-app.include_router(favorites.router)
-
+# CORS configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # React default port
+    allow_origins=["http://localhost:5173"],  # Vite's default port
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Mount all routers under /api prefix
+app.include_router(users.router, prefix="/api")
+app.include_router(recipes.router, prefix="/api")
+app.include_router(ingredients.router, prefix="/api")
+app.include_router(auth.router, prefix="/api")
 
 @app.get("/")
 async def root():
