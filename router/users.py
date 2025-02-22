@@ -4,7 +4,7 @@ from typing import List
 from database import get_db
 import schema
 from user import User
-from utils import hash_pass
+from utils import hash_pass, get_current_user
 
 router = APIRouter(
     prefix="/users",
@@ -33,6 +33,11 @@ def create_user(user: schema.UserCreate, db: Session = Depends(get_db)):
 def get_users(db: Session = Depends(get_db)):
     users = db.query(User).all()
     return users
+
+@router.get("/me", response_model=schema.UserResponse)
+def get_current_user_info(current_user_email: str = Depends(get_current_user), db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == current_user_email).first()
+    return user
 
 @router.get("/{id}", response_model=schema.UserResponse)
 def get_user(id: int, db: Session = Depends(get_db)):
