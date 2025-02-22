@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from database import engine
-from router import posts, users, auth, recipes, ingredients
+from router import posts, users, auth, recipes, ingredients, favorites
 from models import User, Recipe, Ingredient, RecipeIngredient, Instruction
 
 app = FastAPI()
@@ -16,6 +16,7 @@ app.include_router(users.router)
 app.include_router(auth.router)
 app.include_router(recipes.router)
 app.include_router(ingredients.router)
+app.include_router(favorites.router)
 
 @app.get("/")
 async def root():

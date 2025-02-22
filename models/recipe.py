@@ -18,4 +18,9 @@ class Recipe(Base):
     # Relationships
     user = relationship("User", back_populates="recipes")
     ingredients = relationship("RecipeIngredient", back_populates="recipe", cascade="all, delete-orphan")
-    instructions = relationship("Instruction", back_populates="recipe", cascade="all, delete-orphan") 
+    instructions = relationship("Instruction", back_populates="recipe", cascade="all, delete-orphan")
+    favorited_by = relationship(
+        "User",
+        secondary="favorites",
+        back_populates="favorite_recipes"
+    ) 

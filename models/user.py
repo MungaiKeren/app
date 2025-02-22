@@ -12,4 +12,9 @@ class User(Base):
     created_at = Column(TIMESTAMP(timezone=True), server_default=text('now()'))
 
     # Relationship
-    recipes = relationship("Recipe", back_populates="user") 
+    recipes = relationship("Recipe", back_populates="user")
+    favorite_recipes = relationship(
+        "Recipe",
+        secondary="favorites",
+        back_populates="favorited_by"
+    ) 
