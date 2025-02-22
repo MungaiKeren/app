@@ -10,7 +10,7 @@ import os
 load_dotenv()
 
 # Import all models here
-from user import User
+from models.user import User
 from models.recipe import Recipe
 from models.ingredient import Ingredient
 from models.recipe_ingredient import RecipeIngredient
