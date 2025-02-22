@@ -1,6 +1,10 @@
 import pytest
 from jose import jwt
-from main import SECRET_KEY, ALGORITHM
+from decouple import config
+
+# Get these from environment variables or use defaults
+SECRET_KEY = config('SECRET_KEY', default="your-secret-key-for-testing")
+ALGORITHM = config('ALGORITHM', default="HS256")
 
 def test_create_user(client):
     response = client.post("/users/create", json={
@@ -30,6 +34,10 @@ def test_login_user(client, test_user):
     data = response.json()
     assert "access_token" in data
     assert data["token_type"] == "bearer"
+    
+    # Verify the JWT token
+    payload = jwt.decode(data["access_token"], SECRET_KEY, algorithms=[ALGORITHM])
+    assert payload["sub"] == test_user["email"]
 
 def test_login_wrong_password(client, test_user):
     response = client.post("/login", data={
