@@ -1,11 +1,7 @@
 from fastapi import FastAPI
 from database import engine
 from router import posts, users, auth
-from models.user import User
-from models.recipe import Recipe
-from models.ingredient import Ingredient
-from models.recipe_ingredient import RecipeIngredient
-from models.instruction import Instruction
+from models import User, Recipe, Ingredient, RecipeIngredient, Instruction
 
 app = FastAPI()
 

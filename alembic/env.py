@@ -10,11 +10,7 @@ import os
 load_dotenv()
 
 # Import all models here
-from models.user import User
-from models.recipe import Recipe
-from models.ingredient import Ingredient
-from models.recipe_ingredient import RecipeIngredient
-from models.instruction import Instruction
+from models import User, Recipe, Ingredient, RecipeIngredient, Instruction
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
