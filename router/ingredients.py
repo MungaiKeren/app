@@ -11,7 +11,7 @@ router = APIRouter(
     tags=['Ingredients']
 )
 
-@router.post("/", status_code=status.HTTP_201_CREATED, response_model=schema.IngredientResponse)
+@router.post("/create", status_code=status.HTTP_201_CREATED, response_model=schema.IngredientResponse)
 def create_ingredient(
     ingredient: schema.IngredientCreate,
     db: Session = Depends(get_db),
