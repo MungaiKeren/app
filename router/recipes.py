@@ -190,7 +190,7 @@ async def save_image(image: UploadFile) -> str:
     os.makedirs(UPLOAD_DIR, exist_ok=True)
     
     # Generate unique filename
-    file_extension = os.path.splitext(image.filename)[1]
+    file_extension = os.path.splitext(image.filename)[1].lower()
     unique_filename = f"{uuid4()}{file_extension}"
     file_path = os.path.join(UPLOAD_DIR, unique_filename)
     

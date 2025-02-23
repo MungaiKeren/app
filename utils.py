@@ -5,6 +5,8 @@ from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 from dotenv import load_dotenv
 import os
+from uuid import uuid4
+import shutil
 
 load_dotenv()
 
@@ -49,6 +51,22 @@ def verify_token(token: str):
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+def copy_sample_image(image_name: str) -> str:
+    """Copy a sample image from assets to uploads directory"""
+    UPLOAD_DIR = "uploads/recipes"
+    ASSETS_DIR = "assets/sample_images"
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+    
+    # Generate unique filename while keeping the extension
+    file_extension = os.path.splitext(image_name)[1].lower()
+    unique_filename = f"{uuid4()}{file_extension}"
+    
+    source_path = os.path.join(ASSETS_DIR, image_name)
+    destination_path = os.path.join(UPLOAD_DIR, unique_filename)
+    
+    shutil.copy2(source_path, destination_path)
+    return destination_path
 
 def get_current_user(token: str = Depends(oauth2_scheme)):
     return verify_token(token)

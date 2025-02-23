@@ -1,7 +1,11 @@
 from sqlalchemy.orm import Session
-from database import engine, Base, SessionLocal
-from models import User, Ingredient, Recipe, RecipeIngredient, Instruction, CategoryEnum
-from utils import hash_pass
+from app.database import engine, Base, SessionLocal
+from app.models import User, Ingredient, Recipe, RecipeIngredient, Instruction, CategoryEnum
+from app.utils import hash_pass, copy_sample_image
+import shutil
+import os
+from pathlib import Path
+import json
 
 def reset_database():
     print("Dropping all tables...")
@@ -82,6 +86,18 @@ def seed_ingredients(db: Session):
     db.commit()
     print("Ingredients seeded successfully")
 
+def setup_sample_images():
+    """Ensure sample images directory exists with default images"""
+    ASSETS_DIR = Path("assets/sample_images")
+    ASSETS_DIR.mkdir(parents=True, exist_ok=True)
+    
+    # You would place your sample images in this directory
+    # assets/sample_images/
+    #   ├── pancakes.jpg
+    #   ├── scrambled-eggs.jpg
+    #   ├── pasta-1.jpg
+    #   └── etc...
+
 def seed_recipes(db: Session, users: list[User]):
     if db.query(Recipe).first():
         print("Recipes already seeded")
@@ -100,8 +116,11 @@ def seed_recipes(db: Session, users: list[User]):
                 "difficulty": "easy",
                 "category": CategoryEnum.BREAKFAST,
                 "cuisine": "American",
-                "featured_image": "https://example.com/pancakes.jpg",
-                "image_gallery": '["https://example.com/pancakes-1.jpg", "https://example.com/pancakes-2.jpg"]',
+                "featured_image": copy_sample_image("pancake.jpg"),
+                "additional_images": [
+                    copy_sample_image("pancake-stack.jpg"),
+                    copy_sample_image("pancake-syrup.jpg")
+                ],
                 "calories_per_serving": 250,
                 "is_featured": True,
                 "dietary_info": "vegetarian",
@@ -133,7 +152,7 @@ def seed_recipes(db: Session, users: list[User]):
                 "difficulty": "easy",
                 "category": CategoryEnum.BREAKFAST,
                 "cuisine": "International",
-                "featured_image": "https://example.com/scrambled-eggs.jpg",
+                "featured_image": copy_sample_image("scrambled-eggs.jpg"),
                 "calories_per_serving": 180,
                 "is_featured": False,
                 "dietary_info": "gluten-free",
@@ -166,7 +185,7 @@ def seed_recipes(db: Session, users: list[User]):
                 "difficulty": "easy",
                 "category": CategoryEnum.DINNER,
                 "cuisine": "Italian",
-                "featured_image": "https://example.com/pasta-marinara.jpg",
+                "featured_image": copy_sample_image("pasta-marinara.jpg"),
                 "calories_per_serving": 380,
                 "is_featured": True,
                 "dietary_info": "vegetarian",
@@ -288,6 +307,10 @@ def seed_recipes(db: Session, users: list[User]):
     # Create recipes for each user
     for user_id, user_recipes in recipes.items():
         for recipe_data in user_recipes:
+            # Convert additional images list to JSON string if it exists
+            if 'additional_images' in recipe_data:
+                recipe_data['additional_images'] = json.dumps(recipe_data['additional_images'])
+            
             # Extract ingredients and instructions
             ingredients = recipe_data.pop('ingredients')
             instructions = recipe_data.pop('instructions')
@@ -313,6 +336,7 @@ def seed_recipes(db: Session, users: list[User]):
 if __name__ == "__main__":
     print("Starting database reset and seeding...")
     reset_database()
+    setup_sample_images()
     
     # Use a single database session for all operations
     db = SessionLocal()
