@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from datetime import datetime
 from typing import List, Optional
+from enum import Enum
 
 
 class PostBase(BaseModel):
@@ -8,7 +9,7 @@ class PostBase(BaseModel):
     title: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class CreatePost(PostBase):
@@ -95,6 +96,16 @@ class InstructionResponse(InstructionBase):
         orm_mode = True
 
 
+class CategoryEnum(str, Enum):
+    BREAKFAST = "breakfast"
+    LUNCH = "lunch"
+    DINNER = "dinner"
+    DESSERT = "dessert"
+    SNACK = "snack"
+    APPETIZER = "appetizer"
+    BEVERAGE = "beverage"
+
+
 class RecipeBase(BaseModel):
     title: str
     description: Optional[str] = None
@@ -103,7 +114,7 @@ class RecipeBase(BaseModel):
     total_time: Optional[int] = None
     servings: int
     difficulty: Optional[str] = None
-    category: Optional[str] = None
+    category: Optional[CategoryEnum] = None
     cuisine: Optional[str] = None
     featured_image: Optional[str] = None
     additional_images: Optional[List[str]] = None
@@ -139,4 +150,4 @@ class RecipeResponse(RecipeBase):
     user: UserResponse
 
     class Config:
-        orm_mode = True
+        from_attributes = True
