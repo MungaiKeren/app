@@ -31,15 +31,26 @@ async def create_recipe(
                 detail="User not found"
             )
         
+        # Convert recipe data to dict and handle HttpUrl fields
+        recipe_data = recipe.dict(exclude={'ingredients', 'instructions'})
+        
+        # Convert HttpUrl to string for featured_image
+        if recipe_data.get('featured_image'):
+            recipe_data['featured_image'] = str(recipe_data['featured_image'])
+        
+        # Convert HttpUrl list to string list for additional_images
+        if recipe_data.get('additional_images'):
+            recipe_data['additional_images'] = [str(url) for url in recipe_data['additional_images']]
+        
         # Create recipe
         db_recipe = Recipe(
-            **recipe.dict(exclude={'ingredients', 'instructions'}),
+            **recipe_data,
             user_id=user.id
         )
         db.add(db_recipe)
         db.flush()  # This gets us the recipe.id
         
-        # Add ingredients
+        # Add ingredients through the join table
         for ingredient_data in recipe.ingredients:
             # Verify ingredient exists
             ingredient = db.query(Ingredient).filter(Ingredient.id == ingredient_data.ingredient_id).first()
@@ -49,9 +60,12 @@ async def create_recipe(
                     detail=f"Ingredient with id {ingredient_data.ingredient_id} not found"
                 )
             
+            # Create recipe_ingredient association
             recipe_ingredient = RecipeIngredient(
                 recipe_id=db_recipe.id,
-                **ingredient_data.dict()
+                ingredient_id=ingredient_data.ingredient_id,
+                quantity=ingredient_data.quantity,
+                notes=ingredient_data.notes
             )
             db.add(recipe_ingredient)
         

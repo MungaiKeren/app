@@ -117,7 +117,7 @@ def seed_recipes(db: Session, users: list[User]):
                 "category": CategoryEnum.BREAKFAST,
                 "cuisine": "American",
                 "featured_image": images["breakfast"],
-                "additional_images": json.dumps([images["food"]]),
+                "additional_images": [images["food"]],
                 "calories_per_serving": 250,
                 "is_featured": True,
                 "dietary_info": "vegetarian",
@@ -304,10 +304,6 @@ def seed_recipes(db: Session, users: list[User]):
     # Create recipes for each user
     for user_id, user_recipes in recipes.items():
         for recipe_data in user_recipes:
-            # Convert additional images list to JSON string if it exists
-            if 'additional_images' in recipe_data:
-                recipe_data['additional_images'] = json.dumps(recipe_data['additional_images'])
-            
             # Extract ingredients and instructions
             ingredients = recipe_data.pop('ingredients')
             instructions = recipe_data.pop('instructions')
