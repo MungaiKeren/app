@@ -1,10 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from database import get_db
 from models import Recipe, RecipeIngredient, Instruction, User
 import schema
 from utils import get_current_user
+import shutil
+import os
+from uuid import uuid4
 
 router = APIRouter(
     prefix="/recipes",
@@ -12,17 +15,32 @@ router = APIRouter(
 )
 
 @router.post("/create", status_code=status.HTTP_201_CREATED, response_model=schema.RecipeResponse)
-def create_recipe(
-    recipe: schema.RecipeCreate,
+async def create_recipe(
+    recipe: schema.RecipeCreate = Depends(),
+    featured_image: Optional[UploadFile] = File(None),
+    additional_images: List[UploadFile] = File([]),
     db: Session = Depends(get_db),
     current_user_email: str = Depends(get_current_user)
 ):
+    # Handle featured image upload
+    featured_image_path = None
+    if featured_image:
+        featured_image_path = await save_image(featured_image)
+
+    # Handle additional images upload
+    additional_image_paths = []
+    for image in additional_images:
+        image_path = await save_image(image)
+        additional_image_paths.append(image_path)
+
     # Get user_id from email
     user = db.query(User).filter(User.email == current_user_email).first()
     
     # Create recipe
     db_recipe = Recipe(
         **recipe.dict(exclude={'ingredients', 'instructions'}),
+        featured_image=featured_image_path,
+        additional_images=additional_image_paths,
         user_id=user.id
     )
     db.add(db_recipe)
@@ -165,3 +183,19 @@ def delete_recipe(
     
     recipe_query.delete(synchronize_session=False)
     db.commit() 
+
+async def save_image(image: UploadFile) -> str:
+    # Create uploads directory if it doesn't exist
+    UPLOAD_DIR = "uploads/recipes"
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+    
+    # Generate unique filename
+    file_extension = os.path.splitext(image.filename)[1]
+    unique_filename = f"{uuid4()}{file_extension}"
+    file_path = os.path.join(UPLOAD_DIR, unique_filename)
+    
+    # Save the file
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(image.file, buffer)
+    
+    return file_path 

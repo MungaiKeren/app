@@ -102,7 +102,16 @@ class RecipeBase(BaseModel):
     servings: int
 
 
-class RecipeCreate(RecipeBase):
+class RecipeCreate(BaseModel):
+    title: str
+    description: str
+    cooking_time: int
+    prep_time: int
+    total_time: int
+    servings: int
+    difficulty: str
+    category: str
+    cuisine: str
     ingredients: List[RecipeIngredientCreate]
     instructions: List[InstructionCreate]
 

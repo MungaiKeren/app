@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from database import engine, Base, SessionLocal
-from models import User, Ingredient, Recipe, RecipeIngredient, Instruction
+from models import User, Ingredient, Recipe, RecipeIngredient, Instruction, CategoryEnum
 from utils import hash_pass
 
 def reset_database():
@@ -83,12 +83,10 @@ def seed_ingredients(db: Session):
     print("Ingredients seeded successfully")
 
 def seed_recipes(db: Session, users: list[User]):
-    # Check if recipes already exist
     if db.query(Recipe).first():
         print("Recipes already seeded")
         return
 
-    # Recipes grouped by user expertise/style
     recipes = {
         # John Doe - Simple home cooking
         users[0].id: [
@@ -96,7 +94,19 @@ def seed_recipes(db: Session, users: list[User]):
                 "title": "Classic Pancakes",
                 "description": "Fluffy and delicious breakfast pancakes",
                 "cooking_time": 20,
+                "prep_time": 10,
+                "total_time": 30,
                 "servings": 4,
+                "difficulty": "easy",
+                "category": CategoryEnum.BREAKFAST,
+                "cuisine": "American",
+                "featured_image": "https://example.com/pancakes.jpg",
+                "image_gallery": '["https://example.com/pancakes-1.jpg", "https://example.com/pancakes-2.jpg"]',
+                "calories_per_serving": 250,
+                "is_featured": True,
+                "dietary_info": "vegetarian",
+                "notes": "For extra fluffy pancakes, don't overmix the batter",
+                "source": "Family recipe",
                 "ingredients": [
                     {"ingredient_id": 4, "quantity": 1.5, "notes": "All-purpose flour"},
                     {"ingredient_id": 5, "quantity": 50, "notes": "Granulated sugar"},
@@ -117,7 +127,17 @@ def seed_recipes(db: Session, users: list[User]):
                 "title": "Scrambled Eggs",
                 "description": "Perfect creamy scrambled eggs",
                 "cooking_time": 10,
+                "prep_time": 5,
+                "total_time": 15,
                 "servings": 2,
+                "difficulty": "easy",
+                "category": CategoryEnum.BREAKFAST,
+                "cuisine": "International",
+                "featured_image": "https://example.com/scrambled-eggs.jpg",
+                "calories_per_serving": 180,
+                "is_featured": False,
+                "dietary_info": "gluten-free",
+                "notes": "Low heat is key for creamy eggs",
                 "ingredients": [
                     {"ingredient_id": 6, "quantity": 4, "notes": "Fresh eggs"},
                     {"ingredient_id": 8, "quantity": 30, "notes": "For cooking"},
@@ -140,7 +160,18 @@ def seed_recipes(db: Session, users: list[User]):
                 "title": "Simple Pasta Marinara",
                 "description": "Quick and easy pasta with tomato sauce",
                 "cooking_time": 30,
+                "prep_time": 10,
+                "total_time": 40,
                 "servings": 4,
+                "difficulty": "easy",
+                "category": CategoryEnum.DINNER,
+                "cuisine": "Italian",
+                "featured_image": "https://example.com/pasta-marinara.jpg",
+                "calories_per_serving": 380,
+                "is_featured": True,
+                "dietary_info": "vegetarian",
+                "notes": "Use San Marzano tomatoes for best results",
+                "source": "Italian cookbook",
                 "ingredients": [
                     {"ingredient_id": 14, "quantity": 500, "notes": "Spaghetti"},
                     {"ingredient_id": 3, "quantity": 30, "notes": "Extra virgin"},
