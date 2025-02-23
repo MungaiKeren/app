@@ -96,7 +96,11 @@ def get_recipe(
     recipe_id: int,
     db: Session = Depends(get_db)
 ):
-    recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
+    # Load recipe with relationships (ingredients and instructions)
+    recipe = db.query(Recipe)\
+        .filter(Recipe.id == recipe_id)\
+        .first()
+    
     if not recipe:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

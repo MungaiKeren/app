@@ -99,7 +99,20 @@ class RecipeBase(BaseModel):
     title: str
     description: Optional[str] = None
     cooking_time: int
+    prep_time: Optional[int] = None
+    total_time: Optional[int] = None
     servings: int
+    difficulty: Optional[str] = None
+    category: Optional[str] = None
+    cuisine: Optional[str] = None
+    featured_image: Optional[str] = None
+    additional_images: Optional[List[str]] = None
+    calories_per_serving: Optional[int] = None
+    is_featured: Optional[bool] = False
+    is_published: Optional[bool] = True
+    dietary_info: Optional[str] = None
+    notes: Optional[str] = None
+    source: Optional[str] = None
 
 
 class RecipeCreate(BaseModel):
