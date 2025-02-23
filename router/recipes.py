@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from database import get_db
 from models import Recipe, RecipeIngredient, Instruction, User
-import schema
+import schema as schema
 from utils import get_current_user
 import shutil
 import os

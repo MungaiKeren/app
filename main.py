@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from database import engine
-from router import posts, users, auth, recipes, ingredients, favorites
+from router import users, auth, recipes, ingredients, favorites
 from models import User, Recipe, Ingredient, RecipeIngredient, Instruction, Favorite
 from fastapi.middleware.cors import CORSMiddleware
 

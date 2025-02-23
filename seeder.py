@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
-from app.database import engine, Base, SessionLocal
-from app.models import User, Ingredient, Recipe, RecipeIngredient, Instruction, CategoryEnum
-from app.utils import hash_pass, copy_sample_image
+from database import engine, Base, SessionLocal
+from models import User, Ingredient, Recipe, RecipeIngredient, Instruction, CategoryEnum
+from utils import hash_pass, copy_sample_image
 import shutil
 import os
 from pathlib import Path
@@ -88,21 +88,29 @@ def seed_ingredients(db: Session):
 
 def setup_sample_images():
     """Ensure sample images directory exists with default images"""
-    ASSETS_DIR = Path("assets/sample_images")
-    ASSETS_DIR.mkdir(parents=True, exist_ok=True)
+    ASSETS_DIR = Path("app/assets/sample_images")
+    UPLOAD_DIR = Path("uploads/recipes")
     
-    # You would place your sample images in this directory
-    # assets/sample_images/
-    #   ├── pancakes.jpg
-    #   ├── scrambled-eggs.jpg
-    #   ├── pasta-1.jpg
-    #   └── etc...
+    # Create directories if they don't exist
+    ASSETS_DIR.mkdir(parents=True, exist_ok=True)
+    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    
+    # Create a placeholder image if no images exist
+    placeholder_path = ASSETS_DIR / "placeholder.jpg"
+    if not any(ASSETS_DIR.glob("*.jpg")):
+        print("Warning: No sample images found in assets/sample_images directory.")
+        print("Using placeholder values for images.")
+        # Modify the recipe data to use a single image name
+        return "placeholder.jpg"
 
 def seed_recipes(db: Session, users: list[User]):
     if db.query(Recipe).first():
         print("Recipes already seeded")
         return
 
+    # Get placeholder image name
+    placeholder = setup_sample_images()
+    
     recipes = {
         # John Doe - Simple home cooking
         users[0].id: [
@@ -116,11 +124,8 @@ def seed_recipes(db: Session, users: list[User]):
                 "difficulty": "easy",
                 "category": CategoryEnum.BREAKFAST,
                 "cuisine": "American",
-                "featured_image": copy_sample_image("pancake.jpg"),
-                "additional_images": [
-                    copy_sample_image("pancake-stack.jpg"),
-                    copy_sample_image("pancake-syrup.jpg")
-                ],
+                "featured_image": placeholder,
+                "additional_images": json.dumps([placeholder]),
                 "calories_per_serving": 250,
                 "is_featured": True,
                 "dietary_info": "vegetarian",
@@ -152,7 +157,7 @@ def seed_recipes(db: Session, users: list[User]):
                 "difficulty": "easy",
                 "category": CategoryEnum.BREAKFAST,
                 "cuisine": "International",
-                "featured_image": copy_sample_image("scrambled-eggs.jpg"),
+                "featured_image": placeholder,
                 "calories_per_serving": 180,
                 "is_featured": False,
                 "dietary_info": "gluten-free",
@@ -185,7 +190,7 @@ def seed_recipes(db: Session, users: list[User]):
                 "difficulty": "easy",
                 "category": CategoryEnum.DINNER,
                 "cuisine": "Italian",
-                "featured_image": copy_sample_image("pasta-marinara.jpg"),
+                "featured_image": placeholder,
                 "calories_per_serving": 380,
                 "is_featured": True,
                 "dietary_info": "vegetarian",
