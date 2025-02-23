@@ -2,12 +2,14 @@ from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from database import get_db
-from models import Recipe, RecipeIngredient, Instruction, User
+from models import Recipe, RecipeIngredient, Instruction, User, Ingredient
 import schema as schema
 from utils import get_current_user
 import shutil
 import os
 from uuid import uuid4
+from sqlalchemy.exc import SQLAlchemyError
+from pydantic import ValidationError
 
 router = APIRouter(
     prefix="/recipes",
@@ -16,62 +18,85 @@ router = APIRouter(
 
 @router.post("/create", status_code=status.HTTP_201_CREATED, response_model=schema.RecipeResponse)
 async def create_recipe(
-    recipe: schema.RecipeCreate = Depends(),
-    featured_image: Optional[UploadFile] = File(None),
-    additional_images: List[UploadFile] = File([]),
+    recipe: schema.RecipeCreate,
     db: Session = Depends(get_db),
     current_user_email: str = Depends(get_current_user)
 ):
-    # Handle featured image upload
-    featured_image_path = None
-    if featured_image:
-        featured_image_path = await save_image(featured_image)
-
-    # Handle additional images upload
-    additional_image_paths = []
-    for image in additional_images:
-        image_path = await save_image(image)
-        additional_image_paths.append(image_path)
-
-    # Get user_id from email
-    user = db.query(User).filter(User.email == current_user_email).first()
-    
-    # Create recipe
-    db_recipe = Recipe(
-        **recipe.dict(exclude={'ingredients', 'instructions'}),
-        featured_image=featured_image_path,
-        additional_images=additional_image_paths,
-        user_id=user.id
-    )
-    db.add(db_recipe)
-    db.flush()  # This gets us the recipe.id
-    
-    # Add ingredients
-    for ingredient_data in recipe.ingredients:
-        recipe_ingredient = RecipeIngredient(
-            recipe_id=db_recipe.id,
-            **ingredient_data.dict()
-        )
-        db.add(recipe_ingredient)
-    
-    # Add instructions
-    for instruction_data in recipe.instructions:
-        instruction = Instruction(
-            recipe_id=db_recipe.id,
-            **instruction_data.dict()
-        )
-        db.add(instruction)
-    
     try:
+        # Get user_id from email
+        user = db.query(User).filter(User.email == current_user_email).first()
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+        
+        # Create recipe
+        db_recipe = Recipe(
+            **recipe.dict(exclude={'ingredients', 'instructions'}),
+            user_id=user.id
+        )
+        db.add(db_recipe)
+        db.flush()  # This gets us the recipe.id
+        
+        # Add ingredients
+        for ingredient_data in recipe.ingredients:
+            # Verify ingredient exists
+            ingredient = db.query(Ingredient).filter(Ingredient.id == ingredient_data.ingredient_id).first()
+            if not ingredient:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Ingredient with id {ingredient_data.ingredient_id} not found"
+                )
+            
+            recipe_ingredient = RecipeIngredient(
+                recipe_id=db_recipe.id,
+                **ingredient_data.dict()
+            )
+            db.add(recipe_ingredient)
+        
+        # Add instructions
+        for instruction_data in recipe.instructions:
+            instruction = Instruction(
+                recipe_id=db_recipe.id,
+                **instruction_data.dict()
+            )
+            db.add(instruction)
+        
         db.commit()
         db.refresh(db_recipe)
-    except Exception as e:
+        return db_recipe
+
+    except HTTPException as he:
+        db.rollback()
+        raise he
+    except SQLAlchemyError as e:
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Error creating recipe"
+            detail={
+                "msg": "Database error while creating recipe",
+                "error": str(e)
+            }
         )
-    return db_recipe
+    except ValidationError as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={
+                "msg": "Validation error",
+                "errors": e.errors()
+            }
+        )
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={
+                "msg": "An unexpected error occurred",
+                "error": str(e)
+            }
+        )
 
 @router.get("/", response_model=List[schema.RecipeResponse])
 def get_recipes(

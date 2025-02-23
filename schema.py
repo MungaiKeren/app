@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, HttpUrl, constr
 from datetime import datetime
 from typing import List, Optional
 from enum import Enum
@@ -130,14 +130,16 @@ class RecipeCreate(BaseModel):
     title: str
     description: str
     cooking_time: int
-    prep_time: int
-    total_time: int
+    prep_time: Optional[int] = None
+    total_time: Optional[int] = None
     servings: int
-    difficulty: str
-    category: str
-    cuisine: str
+    difficulty: Optional[str] = None
+    category: Optional[str] = None
+    cuisine: Optional[str] = None
     ingredients: List[RecipeIngredientCreate]
     instructions: List[InstructionCreate]
+    featured_image: Optional[HttpUrl] = None
+    additional_images: Optional[List[HttpUrl]] = None
 
 
 class RecipeResponse(RecipeBase):

@@ -87,29 +87,21 @@ def seed_ingredients(db: Session):
     print("Ingredients seeded successfully")
 
 def setup_sample_images():
-    """Ensure sample images directory exists with default images"""
-    ASSETS_DIR = Path("app/assets/sample_images")
-    UPLOAD_DIR = Path("uploads/recipes")
-    
-    # Create directories if they don't exist
-    ASSETS_DIR.mkdir(parents=True, exist_ok=True)
-    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-    
-    # Create a placeholder image if no images exist
-    placeholder_path = ASSETS_DIR / "placeholder.jpg"
-    if not any(ASSETS_DIR.glob("*.jpg")):
-        print("Warning: No sample images found in assets/sample_images directory.")
-        print("Using placeholder values for images.")
-        # Modify the recipe data to use a single image name
-        return "placeholder.jpg"
+    """Return default image URLs for seeding"""
+    return {
+        "placeholder": "https://unsplash.com/photos/four-assorted-dishes-on-wooden-surface-I2uJU-5ZIGI",
+        "food": "https://unsplash.com/photos/grilled-fish-cooked-vegetables-and-fork-on-plate-bpPTlXWTOvg",
+        "breakfast": "https://unsplash.com/photos/round-white-ceramic-plate-filled-with-waffle-hrlvr2ZlUNk",
+        "dinner": "https://unsplash.com/photos/white-and-green-ceramic-plates-on-brown-wooden-dining-table-fb0_wj2MZk4"
+    }
 
 def seed_recipes(db: Session, users: list[User]):
     if db.query(Recipe).first():
         print("Recipes already seeded")
         return
 
-    # Get placeholder image name
-    placeholder = setup_sample_images()
+    # Get placeholder images
+    images = setup_sample_images()
     
     recipes = {
         # John Doe - Simple home cooking
@@ -124,8 +116,8 @@ def seed_recipes(db: Session, users: list[User]):
                 "difficulty": "easy",
                 "category": CategoryEnum.BREAKFAST,
                 "cuisine": "American",
-                "featured_image": placeholder,
-                "additional_images": json.dumps([placeholder]),
+                "featured_image": images["breakfast"],
+                "additional_images": json.dumps([images["food"]]),
                 "calories_per_serving": 250,
                 "is_featured": True,
                 "dietary_info": "vegetarian",
@@ -157,7 +149,7 @@ def seed_recipes(db: Session, users: list[User]):
                 "difficulty": "easy",
                 "category": CategoryEnum.BREAKFAST,
                 "cuisine": "International",
-                "featured_image": placeholder,
+                "featured_image": images["breakfast"],
                 "calories_per_serving": 180,
                 "is_featured": False,
                 "dietary_info": "gluten-free",
@@ -190,7 +182,7 @@ def seed_recipes(db: Session, users: list[User]):
                 "difficulty": "easy",
                 "category": CategoryEnum.DINNER,
                 "cuisine": "Italian",
-                "featured_image": placeholder,
+                "featured_image": images["dinner"],
                 "calories_per_serving": 380,
                 "is_featured": True,
                 "dietary_info": "vegetarian",
