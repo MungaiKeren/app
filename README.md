@@ -15,6 +15,7 @@ The documentation for the api is available on this here[https://github.com/Munga
 ## Setup API
 
 1. Create a virtual environment:
+   navigate into the app directory, then run
 
 ```bash
 python -m venv venv
