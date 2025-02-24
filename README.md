@@ -2,40 +2,27 @@
 
 A FastAPI-based REST API for managing recipes, ingredients, and cooking instructions.
 
-## Project Structure 
+## Project SetUp
+Create a parent folder ```recipe-app``` then clone the FAST API app using these commands
+``` git clone https://github.com/MungaiKeren/app.git ```
 
-recipe-api/
-├── alembic/
-│ ├── versions/
-│ ├── env.py
-│ └── alembic.ini
-├── models/
-│ ├── init.py
-│ ├── user.py
-│ ├── recipe.py
-│ ├── ingredient.py
-│ ├── recipe_ingredient.py
-│ └── instruction.py
-├── router/
-│ ├── auth.py
-│ ├── users.py
-│ ├── recipes.py
-│ └── ingredients.py
-├── schema.py
-├── database.py
-├── utils.py
-├── main.py
-├── seeder.py
-└── requirements.txt
 
-## Setup
+still in the same folder ```recipe-app``` clone the front-end section of this app using this command
+``` git clone https://github.com/MungaiKeren/frontend.git ```
+The documentation for the api is available on this here[https://github.com/MungaiKeren/frontend]
+
+## Setup API
 
 1. Create a virtual environment:
 
 ```bash
 python -m venv venv
-source venv/bin/activate # On Windows: venv\Scripts\activate
 ```
+
+Activate the virtual environment
+```source venv/bin/activate```
+# On Windows: 
+```venv\Scripts\activate```
 
 2. Install dependencies:
 ```bash
