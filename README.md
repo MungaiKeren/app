@@ -11,6 +11,7 @@ still in the same folder ```recipe-app``` clone the front-end section of this ap
 ``` git clone https://github.com/MungaiKeren/frontend.git ```
 The documentation for the api is available on this here[https://github.com/MungaiKeren/frontend]
 
+
 ## Setup API
 
 1. Create a virtual environment:
@@ -21,6 +22,7 @@ python -m venv venv
 
 Activate the virtual environment
 ```source venv/bin/activate```
+
 # On Windows: 
 ```venv\Scripts\activate```
 
